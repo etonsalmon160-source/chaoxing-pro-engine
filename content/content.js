@@ -1125,21 +1125,28 @@ function runTaskScanner() {
 
     if (totalUnfinished === 0) {
       if (totalAll === 0) {
-        window._cx_empty_job_ticks++;
+        window._cx_empty_job_ticks = (window._cx_empty_job_ticks || 0) + 1;
         if (window._cx_empty_job_ticks < 3) {
-          return; // Wait for AJAX to load (3 ticks = 7.5s)
+          return; // Wait for AJAX to load (3 ticks = ~6s)
         }
         if (window._cx_empty_job_ticks === 3) {
-          sendLog('此页面未检测到任务点（可能是纯文本或已做完），即将自动跳过...', 'info');
+          sendLog('此页面未检测到任务点（可能是纯文本或已做完），准备自动跳过...', 'info');
         }
       }
 
-      // Trigger navigation (only once)
-      if (window._cx_empty_job_ticks === 0 || window._cx_empty_job_ticks === 3) {
+      // OCS Watchdog Retry Architecture:
+      // Trigger navigation if not currently locked. If navigation fails to change URL within 6s, 
+      // the lock auto-expires and the scanner will RETRY handleTaskCompletion until page actually navigates!
+      if (!isAutoNextLocked()) {
+        window._cx_last_jump_attempt = Date.now();
         setTimeout(() => {
           handleTaskCompletion();
-        }, 1500);
-        window._cx_empty_job_ticks = 4; // prevent spamming handleTaskCompletion
+        }, 1200);
+      } else {
+        // If locked for > 6 seconds without URL change, force reset lock to allow Watchdog retry
+        if (Date.now() - (window._cx_auto_next_timestamp || 0) > 6000) {
+          resetAutoNextLock();
+        }
       }
     } else {
       window._cx_empty_job_ticks = 0;
@@ -1976,93 +1983,122 @@ function handleTaskCompletion() {
   sendLog('🎉 当前页面任务点已全清（或为无任务点章节），准备跳转下一节...', 'success');
   
   setTimeout(() => {
-    let searchRoot = document;
+    let searchRoots = [document];
     try {
-      if (window.top && window.top.document) {
-        searchRoot = window.top.document;
+      if (window.top && window.top.document && window.top.document !== document) {
+        searchRoots.unshift(window.top.document);
       }
     } catch (e) {}
 
-    // Priority 1: Native "Next" navigation buttons
-    try {
-      let nextBtn = searchRoot.querySelector('.jb_btn.prev_next.next, .prev_next.next, .orientationright, a.next');
-      
-      if (!nextBtn) {
-        const allLinks = Array.from(searchRoot.querySelectorAll('a, div, span, button')).filter(el => {
-          const text = el.innerText ? el.innerText.trim() : '';
-          return text === '下一节' || text === '下一页' || text.includes('下一章');
-        });
-        for (const el of allLinks) {
-          if (el.offsetWidth > 0 && el.offsetHeight > 0 && (el.tagName === 'A' || el.tagName === 'BUTTON' || el.classList.contains('btn') || el.onclick)) {
-            nextBtn = el;
-            break;
+    for (const searchRoot of searchRoots) {
+      // Priority 1: Native "Next" navigation buttons
+      try {
+        let nextBtn = searchRoot.querySelector('.jb_btn.prev_next.next, .prev_next.next, .orientationright, a.next, .nodeItem.r i');
+        
+        if (!nextBtn) {
+          const allLinks = Array.from(searchRoot.querySelectorAll('a, div, span, button')).filter(el => {
+            const text = el.innerText ? el.innerText.trim() : '';
+            return text === '下一节' || text === '下一页' || text.includes('下一章');
+          });
+          for (const el of allLinks) {
+            if (el.offsetWidth > 0 && el.offsetHeight > 0 && (el.tagName === 'A' || el.tagName === 'BUTTON' || el.classList.contains('btn') || el.onclick)) {
+              nextBtn = el;
+              break;
+            }
           }
         }
-      }
 
-      if (nextBtn) {
-        sendLog('检测到原生跳转按钮，即将自动平滑跳转下一节...', 'info');
-        triggerClick(nextBtn);
-        setTimeout(resetAutoNextLock, 4000);
-        return;
-      }
-    } catch (e) {}
-
-    // Priority 2: Catalog Tree Active Sibling (Compatible with all Chaoxing catalog DOMs)
-    try {
-      const allChapters = Array.from(searchRoot.querySelectorAll('[onclick*="getTeacherAjax"], .posCatalog_name, .ncells a, .catalog_name'));
-      const activeItem = searchRoot.querySelector('.posCatalog_select, .posCatalog_active, .ncells .active, .catalog_active');
-      
-      let currentIndex = -1;
-      if (activeItem) {
-        currentIndex = allChapters.findIndex(el => el === activeItem || el.contains(activeItem) || activeItem.contains(el));
-      }
-
-      if (currentIndex !== -1 && currentIndex + 1 < allChapters.length) {
-        const nextChapterLink = allChapters[currentIndex + 1];
-        const nextName = nextChapterLink.innerText ? nextChapterLink.innerText.trim() : '下一节';
-        sendLog(`准备通过目录树安全跳转至: ${nextName}...`, 'info');
-        
-        if (nextChapterLink.scrollIntoView) {
-          nextChapterLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (nextBtn) {
+          sendLog('检测到原生跳转按钮，即将自动平滑跳转下一节...', 'info');
+          triggerClick(nextBtn);
+          setTimeout(resetAutoNextLock, 3500);
+          return;
         }
-        triggerClick(nextChapterLink);
-        setTimeout(resetAutoNextLock, 4000);
-        return;
-      } else if (allChapters.length > 0 && currentIndex === allChapters.length - 1) {
-        sendLog('🎉 检测到全部章节任务点均已完成！挂机流程完成。', 'success');
-        resetAutoNextLock();
-        return;
-      }
-    } catch (e) {}
+      } catch (e) {}
 
-    // Priority 3: Fallback API (PCount)
-    try {
-      const curChapterId = searchRoot.querySelector('#curChapterId');
-      const curCourseId = searchRoot.querySelector('#curCourseId');
-      const curClazzId = searchRoot.querySelector('#curClazzId');
-      const count = searchRoot.querySelectorAll('#prev_tab .prev_ul li');
-      
-      if (curChapterId && curCourseId && curClazzId) {
-        sendLog('准备使用底层 API 安全跳转下一节...', 'info');
-        const script = document.createElement('script');
-        script.textContent = `
-          try {
-            if (window.top && typeof window.top.PCount !== 'undefined' && window.top.PCount.next) {
-              window.top._preChapterId = '${curChapterId.value}';
-              window.top.PCount.next('${count.length}', '${curChapterId.value}', '${curCourseId.value}', '${curClazzId.value}', '');
-            }
-          } catch (e) {}
-        `;
-        document.head.appendChild(script);
-        setTimeout(() => script.remove(), 1000);
-        setTimeout(resetAutoNextLock, 4000);
-        return;
-      }
-    } catch (e) {}
+      // Priority 2: OCS Exact Catalog Tree Navigation
+      try {
+        const rawChapters = Array.from(searchRoot.querySelectorAll('[onclick*="getTeacherAjax"], .posCatalog_name, .ncells a, .catalog_name'));
+        const activeItem = searchRoot.querySelector('.posCatalog_select, .posCatalog_active, .ncells .active, .catalog_active');
+        
+        let currentIndex = -1;
+        if (activeItem) {
+          currentIndex = rawChapters.findIndex(el => 
+            el === activeItem || 
+            el.contains(activeItem) || 
+            activeItem.contains(el) ||
+            (el.parentElement && el.parentElement === activeItem) ||
+            (el.parentElement && el.parentElement === activeItem.parentElement)
+          );
+        }
 
-    sendLog('❌ 未检测到下一章节，可能已全部刷完或目录结构异常，请手动翻页！', 'error');
-    resetAutoNextLock();
+        if (currentIndex !== -1 && currentIndex + 1 < rawChapters.length) {
+          const nextChapterLink = rawChapters[currentIndex + 1];
+          const nextName = nextChapterLink.innerText ? nextChapterLink.innerText.trim() : '下一节';
+          sendLog(`准备通过目录树安全跳转至: ${nextName}...`, 'info');
+          
+          if (nextChapterLink.scrollIntoView) {
+            nextChapterLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          
+          // OCS Trick: Click the .posCatalog_name inside/parent of nextChapterLink if available
+          const clickTarget = nextChapterLink.querySelector('.posCatalog_name') || 
+                             (nextChapterLink.parentElement ? nextChapterLink.parentElement.querySelector('.posCatalog_name') : null) || 
+                             nextChapterLink;
+                             
+          triggerClick(clickTarget);
+          setTimeout(resetAutoNextLock, 3500);
+          return;
+        } else if (rawChapters.length > 0 && currentIndex === rawChapters.length - 1) {
+          sendLog('🎉 检测到全部章节任务点均已完成！挂机流程完成。', 'success');
+          resetAutoNextLock();
+          return;
+        }
+      } catch (e) {}
 
-  }, Math.random() * 1000 + 1500);
+      // Priority 3: Fallback API (PCount)
+      try {
+        const curChapterId = searchRoot.querySelector('#curChapterId');
+        const curCourseId = searchRoot.querySelector('#curCourseId');
+        const curClazzId = searchRoot.querySelector('#curClazzId');
+        const count = searchRoot.querySelectorAll('#prev_tab .prev_ul li');
+        
+        if (curChapterId && curCourseId && curClazzId) {
+          sendLog('准备使用底层 API 安全跳转下一节...', 'info');
+          const script = document.createElement('script');
+          script.textContent = `
+            try {
+              if (window.top && typeof window.top.PCount !== 'undefined' && window.top.PCount.next) {
+                window.top._preChapterId = '${curChapterId.value}';
+                window.top.PCount.next('${count.length}', '${curChapterId.value}', '${curCourseId.value}', '${curClazzId.value}', '');
+              }
+            } catch (e) {}
+          `;
+          document.head.appendChild(script);
+          setTimeout(() => script.remove(), 1000);
+          setTimeout(resetAutoNextLock, 3500);
+          return;
+        }
+      } catch (e) {}
+
+      // Priority 4: Sibling DOM element fallback
+      try {
+        const activeItem = searchRoot.querySelector('.posCatalog_select, .posCatalog_active');
+        if (activeItem) {
+          let nextElem = activeItem.nextElementSibling || (activeItem.parentElement ? activeItem.parentElement.nextElementSibling : null);
+          if (nextElem) {
+            const link = nextElem.querySelector('a, [onclick], .posCatalog_name') || nextElem;
+            sendLog('准备使用目录树 DOM 邻居节点跳转下一节...', 'info');
+            triggerClick(link);
+            setTimeout(resetAutoNextLock, 3500);
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
+    sendLog('❌ 未检测到下一章节，自动看门狗将在 5 秒后再次尝试寻找跳转节点...', 'error');
+    setTimeout(resetAutoNextLock, 5000);
+
+  }, Math.random() * 800 + 1000);
 }
