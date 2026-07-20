@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>超星学习通模拟主页</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      background-color: #f1f5f9;
+      overflow: hidden;
+    }
+    #sidebar {
+      width: 260px;
+      background-color: #0f172a;
+      color: white;
+      padding: 20px 10px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #1e293b;
+    }
+    #sidebar h2 {
+      font-size: 16px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #3b82f6;
+      font-weight: 700;
+    }
+    .catalog-item {
+      padding: 12px 15px;
+      margin-bottom: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .catalog-item:hover {
+      background-color: #1e293b;
+      color: #f8fafc;
+    }
+    .catalog-item.posCatalog_active {
+      background-color: #3b82f6;
+      color: white;
+      font-weight: bold;
+    }
+    #content-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    #tabs {
+      display: flex;
+      background-color: #cbd5e1;
+      padding: 4px;
+      border-radius: 8px 8px 0 0;
+      width: fit-content;
+    }
+    .tab-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+      font-weight: 500;
+      font-size: 13px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-item.active {
+      background-color: white;
+      color: #3b82f6;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .ans-job-icon {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #f59e0b; /* Yellow for incomplete */
+    }
+    .ans-job-icon-finished {
+      background-color: #10b981 !important; /* Green for complete */
+    }
+    #iframe-container {
+      flex: 1;
+      background-color: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 0 8px 8px 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>课程目录 (Catalog)</h2>
+    <!-- posCatalog_active marks current active catalog section -->
+    <div class="catalog-item posCatalog_active" id="ch-1" onclick="switchChapter(1)">第一章：中国的首都是哪里？</div>
+    <div class="catalog-item posCatalog_select" id="ch-2" onclick="switchChapter(2)">第二章：关于 1+1 的计算</div>
+    <div class="catalog-item posCatalog_select" id="ch-3" onclick="switchChapter(3)">第三章：多选题与基础测验</div>
+  </div>
+
+  <div id="content-pane">
+    <div id="tabs">
+      <div class="tab-item active" id="tab-video" onclick="switchTab('video')">
+        <span class="ans-job-icon" id="icon-video"></span> 视频任务 (Video)
+      </div>
+      <div class="tab-item" id="tab-quiz" onclick="switchTab('quiz')">
+        <span class="ans-job-icon" id="icon-quiz"></span> 章节测验 (Quiz)
+      </div>
+      <div class="tab-item" id="tab-ppt" onclick="switchTab('ppt')">
+        <span class="ans-job-icon" id="icon-ppt"></span> 课件阅读 (PPT/PDF)
+      </div>
+    </div>
+    <div id="iframe-container">
+      <iframe id="iframe" src="/test/mock_video.html"></iframe>
+    </div>
+  </div>
+
+  <script>
+    let currentChapter = 1;
+    let currentTab = 'video';
+
+    // Listen for messages from sub-frames to simulate task completion state changes
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'CX_TASK_COMPLETED') {
+        console.log(`[Top Context] Received completion for ${currentTab}`);
+        const iconId = `icon-${currentTab}`;
+        const icon = document.getElementById(iconId);
+        if (icon) {
+          icon.classList.add('ans-job-icon-finished');
+        }
+      }
+    });
+
+    function switchChapter(num) {
+      currentChapter = num;
+      // Reset catalog styles
+      document.querySelectorAll('.catalog-item').forEach(item => {
+        item.className = 'catalog-item posCatalog_select';
+      });
+      document.getElementById(`ch-${num}`).className = 'catalog-item posCatalog_active';
+      console.log(`[Top Context] Switched to Chapter ${num}`);
+      
+      // Default to video tab and reset icons
+      document.querySelectorAll('.ans-job-icon').forEach(icon => {
+        icon.classList.remove('ans-job-icon-finished');
+      });
+      switchTab('video');
+    }
+
+    function switchTab(type) {
+      currentTab = type;
+      document.querySelectorAll('.tab-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      if (type === 'video') {
+        document.getElementById('tab-video').classList.add('active');
+        document.getElementById('iframe').src = '/test/mock_video.html';
+      } else if (type === 'quiz') {
+        document.getElementById('tab-quiz').classList.add('active');
+        document.getElementById('iframe').src = '/test/mock_quiz.html';
+      } else if (type === 'ppt') {
+        document.getElementById('tab-ppt').classList.add('active');
+        document.getElementById('iframe').src = '/test/mock_ppt.html';
+      }
+      console.log(`[Top Context] Switched to Card: ${type}`);
+    }
+  </script>
+</body>
+</html>

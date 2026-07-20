@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock PPT/PDF 课件阅读</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #2b2b2b; color: #fff; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; }
+    #viewerContainer { width: 80%; max-width: 800px; height: 450px; background: #fff; color: #333; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .slide-content { font-size: 28px; font-weight: bold; color: #2c3e50; text-align: center; padding: 40px; }
+    .slide-sub { font-size: 16px; color: #7f8c8d; margin-top: 20px; }
+    .controls { display: flex; align-items: center; gap: 20px; margin-top: 20px; background: rgba(0,0,0,0.6); padding: 10px 25px; border-radius: 30px; }
+    .page-info { font-size: 16px; font-weight: 500; }
+    #nextBtn { background: #3498db; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; }
+    #nextBtn:hover { background: #2980b9; }
+    #nextBtn.disabled { background: #555; cursor: not-allowed; opacity: 0.5; }
+    .status-badge { position: absolute; top: 15px; left: 15px; background: #e67e22; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="viewerContainer" class="imglook" data-type="ppt">
+    <div class="status-badge">超星课件阅读器 (PPT / PDF)</div>
+    <div class="slide-content" id="slideTitle">第 1 页：课程导论与核心知识要点</div>
+    <div class="slide-sub" id="slideSub">仔细阅读本页内容后，点击“下一页”进入后面的学习章节...</div>
+  </div>
+
+  <div class="controls">
+    <div class="page-info">
+      第 <span id="curPage" class="curPage">1</span> / <span id="allPage" class="allPage">5</span> 页
+    </div>
+    <button id="nextBtn" class="turnpage_next pageBtn next">下一页</button>
+  </div>
+
+  <script>
+    let cur = 1;
+    const total = 5;
+    const titles = [
+      "",
+      "第 1 页：课程导论与核心知识要点",
+      "第 2 页：理论基础分析与建模方法",
+      "第 3 页：案例实践与算法流程解析",
+      "第 4 页：综合评测与常见问题总结",
+      "第 5 页：本章要点小结与复习思考题（末页）"
+    ];
+    const subs = [
+      "",
+      "仔细阅读本页内容后，点击“下一页”进入后面的学习章节...",
+      "重点掌握数据归一化与特征选择技术...",
+      "观察各个子系统的协同调用图与输入输出参数...",
+      "回顾上节课出现的3个典型错误案例并进行修正...",
+      "恭喜！您已成功阅读完本节课件所有 PPT 页面。"
+    ];
+
+    const nextBtn = document.getElementById('nextBtn');
+    const curPageEl = document.getElementById('curPage');
+    const slideTitle = document.getElementById('slideTitle');
+    const slideSub = document.getElementById('slideSub');
+
+    nextBtn.addEventListener('click', () => {
+      if (cur < total) {
+        cur++;
+        curPageEl.textContent = cur;
+        slideTitle.textContent = titles[cur];
+        slideSub.textContent = subs[cur];
+        console.log(`[PPT Viewer] Turned to slide ${cur}/${total}`);
+        if (cur === total) {
+          nextBtn.classList.add('disabled');
+          nextBtn.textContent = '已至末页';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

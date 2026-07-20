@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>视频播放模拟</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+      background-color: #fafafa;
+      color: #334155;
+    }
+    .video-container {
+      max-width: 560px;
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    video {
+      width: 100%;
+      display: block;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 10px 14px;
+      background-color: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      display: flex;
+      gap: 20px;
+      width: fit-content;
+    }
+    .indicator-value {
+      font-weight: 700;
+      color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <h3>超星视频播放器模拟 (Video Task Point)</h3>
+  <div class="video-container">
+    <!-- Short standard video (Big Buck Bunny teaser) for testing completion logic -->
+    <video id="video_html5_api" src="https://www.w3schools.com/html/mov_bbb.mp4" controls autoplay muted></video>
+  </div>
+  <div class="info">
+    <div>当前播放速度: <span id="speed-indicator" class="indicator-value">1.0</span>x</div>
+    <div>静音状态: <span id="mute-indicator" class="indicator-value">是</span></div>
+  </div>
+
+  <script>
+    const video = document.getElementById('video_html5_api');
+    const speedInd = document.getElementById('speed-indicator');
+    const muteInd = document.getElementById('mute-indicator');
+
+    // Poll to show real speed/mute state of the media element
+    setInterval(() => {
+      speedInd.innerText = video.playbackRate.toFixed(2);
+      muteInd.innerText = video.muted ? '是 (Muted)' : '否 (Unmuted)';
+    }, 500);
+  </script>
+</body>
+</html>
