@@ -1,30 +1,29 @@
 /* popup.css - Ultra-Premium State-of-the-Art Obsidian Studio Theme */
 
 :root {
-  --bg-main: #0B0E14; /* We'll use a gradient on body for glassmorphism */
-  --bg-panel: rgba(19, 23, 32, 0.6);
-  --bg-card: rgba(27, 33, 45, 0.5);
-  --bg-input: rgba(8, 10, 14, 0.5);
-  --border-light: rgba(255, 255, 255, 0.15);
-  --border-active: rgba(56, 189, 248, 0.6);
+  --bg-main: #0B0E14;
+  --bg-panel: #131720;
+  --bg-card: #1B212D;
+  --bg-input: #080A0E;
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(56, 189, 248, 0.4);
   --text-primary: #F8FAFC;
-  --text-secondary: #E2E8F0;
-  --text-tertiary: #94A3B8;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
   --accent-cyan: #38BDF8;
   --accent-blue: #3B82F6;
   --accent-indigo: #6366F1;
   --accent-green: #10B981;
   --accent-amber: #F59E0B;
   --accent-red: #EF4444;
-  --gradient-pro: linear-gradient(135deg, rgba(56, 189, 248, 0.8) 0%, rgba(59, 130, 246, 0.8) 50%, rgba(99, 102, 241, 0.8) 100%);
-  --gradient-btn: linear-gradient(135deg, rgba(2, 132, 199, 0.9) 0%, rgba(37, 99, 235, 0.9) 50%, rgba(79, 70, 229, 0.9) 100%);
-  --gradient-btn-hover: linear-gradient(135deg, rgba(56, 189, 248, 1) 0%, rgba(59, 130, 246, 1) 50%, rgba(99, 102, 241, 1) 100%);
-  --shadow-main: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+  --gradient-pro: linear-gradient(135deg, #38BDF8 0%, #3B82F6 50%, #6366F1 100%);
+  --gradient-btn: linear-gradient(135deg, #0284C7 0%, #2563EB 50%, #4F46E5 100%);
+  --gradient-btn-hover: linear-gradient(135deg, #38BDF8 0%, #3B82F6 50%, #6366F1 100%);
+  --shadow-main: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  --glass-blur: blur(16px);
 }
 
 * {
@@ -35,9 +34,7 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: var(--bg-main) radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 40%);
-  background-attachment: fixed;
+  background-color: var(--bg-main);
   color: var(--text-primary);
   width: 400px;
   max-height: 620px;
@@ -78,8 +75,6 @@ body {
   align-items: center;
   padding: 10px 12px;
   background: var(--bg-panel);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-main);
@@ -160,8 +155,6 @@ body {
   grid-template-columns: repeat(5, 1fr);
   gap: 4px;
   background: var(--bg-panel);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   padding: 4px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
@@ -257,8 +250,6 @@ body {
 /* Setting Items / Cards */
 .setting-item {
   background: var(--bg-panel);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   padding: 12px 14px;
