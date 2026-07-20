@@ -17,25 +17,53 @@
           <span class="subtitle">Chaoxing Intelligent Automation Engine</span>
         </div>
       </div>
-      <div class="header-status">
-        <span class="status-dot pulsing"></span>
-        <span class="status-text">就绪</span>
+      <div class="header-right-group">
+        <button type="button" id="btn-open-big-window" class="btn-big-window-mode" title="在新标签页放大为全屏独立大窗控制台">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          <span id="big-window-text">独立大窗</span>
+        </button>
+        <div class="header-status">
+          <span class="status-dot pulsing"></span>
+          <span class="status-text">就绪</span>
+        </div>
       </div>
     </header>
+
+    <!-- Master Engine Control & Small Window Manager Bar -->
+    <div class="master-control-bar">
+      <button type="button" id="btn-master-toggle" class="btn-master-toggle active" title="点击一键启动/暂停全自动化挂机引擎">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        <span id="master-toggle-text">启动全自动引擎</span>
+      </button>
+      <button type="button" id="btn-restore-widget" class="btn-master-action" title="在网页中唤醒/恢复左侧 HUD 悬浮小窗">
+        📌 恢复左侧小窗
+      </button>
+      <button type="button" id="btn-popup-skip" class="btn-master-action" title="手动跳过本章节">
+        ⏭ 跳过本章
+      </button>
+    </div>
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
       <button class="nav-tab active" data-target="tab-video">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+        <svg width="16" height="16" class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
         视频加速
       </button>
       <button class="nav-tab" data-target="tab-quiz">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.88 16.12a10 10 0 0 0 13.24 3.16L12 12z"></path><path d="M21.19 8.12 12 12V2a10 10 0 0 1 9.19 6.12z"></path></svg>
+        <svg width="16" height="16" class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.88 16.12a10 10 0 0 0 13.24 3.16L12 12z"></path><path d="M21.19 8.12 12 12V2a10 10 0 0 1 9.19 6.12z"></path></svg>
         智能答题
       </button>
       <button class="nav-tab" data-target="tab-general">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <svg width="16" height="16" class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         自动化流程
+      </button>
+      <button class="nav-tab" data-target="tab-logs">
+        <svg width="16" height="16" class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        运行日志
+      </button>
+      <button class="nav-tab" data-target="tab-support">
+        <svg width="16" height="16" class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        关于与支持
       </button>
     </nav>
 
@@ -46,7 +74,7 @@
       <section id="tab-video" class="panel-section active">
         <div class="panel-header">
           <div class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             视频播放引擎与时控
           </div>
           <span class="panel-tag">智能突破</span>
@@ -107,7 +135,7 @@
       <section id="tab-quiz" class="panel-section">
         <div class="panel-header">
           <div class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             多模型 AI 智能答题引擎
           </div>
           <div class="header-toggle">
@@ -127,6 +155,8 @@
               <button type="button" class="provider-pill" data-provider="openai">🟢 OpenAI</button>
               <button type="button" class="provider-pill" data-provider="gemini">🔷 Gemini</button>
               <button type="button" class="provider-pill" data-provider="claude">🟣 Claude</button>
+              <button type="button" class="provider-pill" data-provider="siliconflow">⚡ 硅基流动</button>
+              <button type="button" class="provider-pill" data-provider="qwen">☁️ 通义千问</button>
               <button type="button" class="provider-pill" data-provider="custom">⚙️ 自定义</button>
             </div>
             <!-- Hidden real input -->
@@ -137,10 +167,10 @@
           <div class="setting-item flex-column">
             <label class="item-title" for="api-key">API 授权密钥 (API Key / Token)</label>
             <div class="input-with-icon">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <svg width="16" height="16" class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
               <input type="password" id="api-key" class="pro-input" placeholder="输入对应厂商的 API Key (如 sk-xxxx 或 AI Studio 密钥)">
               <button type="button" class="btn-reveal" id="btn-reveal-key" title="显示/隐藏密钥">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
             </div>
             <p class="item-desc" id="provider-hint">DeepSeek 官方或兼容 API 密钥。已自动适配身份鉴权头</p>
@@ -149,7 +179,12 @@
           <!-- Model Name Selector -->
           <div class="grid-2col">
             <div class="setting-item flex-column">
-              <label class="item-title" for="model-name">具体模型版本</label>
+              <div class="item-label-row">
+                <label class="item-title" for="model-name">具体模型版本</label>
+                <button type="button" id="btn-fetch-models" class="btn-fetch-models" title="自动连接端点并获取当前 API Key 账户下支持的最新模型列表">
+                  🔄 自动识别模型
+                </button>
+              </div>
               <select id="model-select" class="pro-select">
                 <!-- Populated dynamically by JS based on provider -->
                 <option value="deepseek-chat">DeepSeek-V3 (deepseek-chat)</option>
@@ -170,7 +205,7 @@
           <div class="setting-item flex-column">
             <label class="item-title" for="api-url">API 请求节点 URL 地址 (可自定义代理)</label>
             <div class="input-with-icon">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+              <svg width="16" height="16" class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
               <input type="url" id="api-url" class="pro-input code-input" placeholder="https://api.deepseek.com/chat/completions">
             </div>
             <p class="item-desc">默认使用厂商官方节点；如通过 OneAPI / 学校代理等中转，可直接修改为中转 URL</p>
@@ -180,7 +215,7 @@
           <div class="advanced-toggle-row">
             <button type="button" class="btn-advanced-toggle" id="btn-toggle-advanced">
               <span>🔧 高级配置：底层报文模板与提取路径 (非专业人士无需修改)</span>
-              <svg class="arrow-icon" id="arrow-advanced" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <svg width="16" height="16" class="arrow-icon" id="arrow-advanced" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
           </div>
 
@@ -212,7 +247,7 @@
             <div class="sandbox-header">
               <span class="sandbox-title">终端在线连通性测试 (多模型适配)</span>
               <button type="button" id="btn-test-api" class="btn-sandbox-test">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 模拟发包测试
               </button>
             </div>
@@ -227,7 +262,7 @@
       <section id="tab-general" class="panel-section">
         <div class="panel-header">
           <div class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             无人值守与行为模拟
           </div>
           <span class="panel-tag">拟人算法</span>
@@ -285,12 +320,123 @@
         </div>
       </section>
 
+      <!-- Tab 4: Real-time Execution Log Console -->
+      <section id="tab-logs" class="panel-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            实时运行日志与状态监视器
+          </div>
+          <span class="panel-tag tag-live">LIVE 动态监听</span>
+        </div>
+
+        <div class="log-panel-container">
+          <div class="log-toolbar">
+            <div class="log-filter-group">
+              <button type="button" class="log-filter-btn active" data-filter="all">全部</button>
+              <button type="button" class="log-filter-btn" data-filter="info">信息</button>
+              <button type="button" class="log-filter-btn" data-filter="success">成功</button>
+              <button type="button" class="log-filter-btn" data-filter="warn">警告</button>
+              <button type="button" class="log-filter-btn" data-filter="error">错误</button>
+            </div>
+            <div class="log-actions">
+              <button type="button" id="btn-copy-logs" class="btn-log-action" title="一键复制日志">📋 复制</button>
+              <button type="button" id="btn-clear-logs" class="btn-log-action danger" title="清空所有记录">🗑️ 清空</button>
+            </div>
+          </div>
+
+          <div id="popup-log-console" class="popup-log-console">
+            <div class="log-empty-tip">暂无运行日志，请在超星学习通页面开启自动化...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 5: About & Support -->
+      <section id="tab-support" class="panel-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            关于与技术支持
+          </div>
+          <span class="panel-tag tag-purple">PRO 旗舰版</span>
+        </div>
+
+        <div class="support-card-group">
+          <!-- Project Info Card -->
+          <div class="support-card project-card">
+            <div class="project-hero">
+              <img src="../icons/icon48.png" alt="Logo" class="support-logo">
+              <div class="project-details">
+                <h3>学习通网课控制台 PRO</h3>
+                <span class="version-badge">v1.0.0 Stable</span>
+                <p class="project-slogan">全功能底层 Hook 驱动 · 多 AI 大模型联动答题引擎</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact & Repository Card -->
+          <div class="support-card links-card">
+            <h4 class="card-subtitle">📮 开发者联系与开源项目</h4>
+            
+            <div class="link-item-row">
+              <div class="link-info">
+                <span class="link-icon">📧</span>
+                <div class="link-text">
+                  <span class="link-label">开发者技术支持邮箱</span>
+                  <a href="mailto:etonsalmon160@gmail.com" class="link-value" id="email-link">etonsalmon160@gmail.com</a>
+                </div>
+              </div>
+              <button type="button" id="btn-copy-email" class="btn-card-action">复制邮箱</button>
+            </div>
+
+            <div class="link-item-row">
+              <div class="link-info">
+                <span class="link-icon">🐙</span>
+                <div class="link-text">
+                  <span class="link-label">GitHub 开源仓库项目地址</span>
+                  <a href="https://github.com/etonsalmon160-source/chaoxing-pro-engine" target="_blank" class="link-value" id="github-link">etonsalmon160-source/chaoxing-pro-engine</a>
+                </div>
+              </div>
+              <button type="button" id="btn-open-github" class="btn-card-action primary">访问 GitHub</button>
+            </div>
+          </div>
+
+          <!-- Semi-Public Welfare Donation & Research Support -->
+          <div class="support-card sponsor-card">
+            <div class="sponsor-header">
+              <span class="sponsor-badge">☕ 自由赞赏 / 鼓励开源</span>
+              <h4 class="card-subtitle">半公益致谢与科研资金支持</h4>
+            </div>
+            <p class="sponsor-desc">
+              本插件为 <strong>完全免费且无任何功能限制的开源项目</strong>。<br>
+              <em>“开源制作不易，您的每一笔资金都将用于生物学研究。”</em><br>
+              若助手帮助您节省了宝贵时间，欢迎自由赞赏支持（完全自愿，赞赏与否均享完整功能）！
+            </p>
+            <div class="sponsor-qr-wrapper">
+              <img src="sponsor.jpg" alt="赞赏码 ETO1024's Tip Code" class="sponsor-qr-img" />
+              <span class="sponsor-qr-caption">微信/赞赏码：ETO1024's Tip Code</span>
+            </div>
+          </div>
+
+          <!-- Core Features Highlights -->
+          <div class="support-card info-card">
+            <h4 class="card-subtitle">✨ 核心优势与特色功能</h4>
+            <ul class="feature-list">
+              <li>⚡ <strong>底层 HTMLVideoElement 原型链挂载</strong>：突破限制真正极速倍速播放</li>
+              <li>🧠 <strong>2025/2026 前沿 AI 大模型</strong>：在线自动拉取识别模型列表 (DeepSeek-R1/V3, GPT-4o, Gemini 2.0, Claude 3.7)</li>
+              <li>🛡️ <strong>智能无死锁跳转</strong>：4.5s 动态超时锁 + 看门狗彻底消除连跳卡死</li>
+              <li>💻 <strong>悬浮 HUD 小窗 & 全屏大窗双终端</strong>：数据多端无缝同步控制</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- Bottom Sticky Actions -->
     <footer class="app-footer">
       <button type="button" id="btn-save" class="btn-pro-submit">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
         保存当前配置并立即生效
       </button>
       <div id="save-status" class="save-toast"></div>

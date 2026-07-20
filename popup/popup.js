@@ -1,305 +1,344 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chaoxing Pro Engine</title>
-  <link rel="stylesheet" href="popup.css">
-</head>
-<body>
-  <div class="app-container">
-    <!-- Top Header & Branding -->
-    <header class="app-header">
-      <div class="brand">
-        <img src="../icons/icon32.png" alt="Logo" class="brand-logo">
-        <div class="brand-info">
-          <h1>学习通网课控制台 <span class="badge-pro">PRO</span></h1>
-          <span class="subtitle">Chaoxing Intelligent Automation Engine</span>
-        </div>
-      </div>
-      <div class="header-status">
-        <span class="status-dot pulsing"></span>
-        <span class="status-text">就绪</span>
-      </div>
-    </header>
+// popup.js - Chaoxing Pro Engine Controller with Multi-Model AI Support
 
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs">
-      <button class="nav-tab active" data-target="tab-video">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
-        视频加速
-      </button>
-      <button class="nav-tab" data-target="tab-quiz">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.88 16.12a10 10 0 0 0 13.24 3.16L12 12z"></path><path d="M21.19 8.12 12 12V2a10 10 0 0 1 9.19 6.12z"></path></svg>
-        智能答题
-      </button>
-      <button class="nav-tab" data-target="tab-general">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        自动化流程
-      </button>
-    </nav>
+const PROVIDER_PRESETS = {
+  deepseek: {
+    name: 'DeepSeek',
+    url: 'https://api.deepseek.com/chat/completions',
+    modelsUrl: 'https://api.deepseek.com/models',
+    method: 'POST',
+    models: [
+      { id: 'deepseek-chat', label: 'DeepSeek-V3 (deepseek-chat 旗舰问答)' },
+      { id: 'deepseek-reasoner', label: 'DeepSeek-R1 (deepseek-reasoner 深度推理)' }
+    ],
+    hint: 'DeepSeek 官方 API Key。默认搭载 V3 与 R1 深度推理大模型。',
+    bodyTemplate: '{\n  "model": "{model}",\n  "messages": [\n    {"role": "system", "content": "你是一个在线网课辅助答题AI。请直接输出针对问题的简明准确答案（仅输出正确答案的选项字母或文本，不要解释说明）。"},\n    {"role": "user", "content": "{question}"}\n  ],\n  "temperature": 0.1\n}',
+    path: 'choices[0].message.content'
+  },
+  openai: {
+    name: 'OpenAI',
+    url: 'https://api.openai.com/v1/chat/completions',
+    modelsUrl: 'https://api.openai.com/v1/models',
+    method: 'POST',
+    models: [
+      { id: 'gpt-4o', label: 'GPT-4o (全能旗舰)' },
+      { id: 'gpt-4o-mini', label: 'GPT-4o Mini (极速/推荐)' },
+      { id: 'o3-mini', label: 'o3-mini (前沿推理)' },
+      { id: 'o1', label: 'o1 (深度思考)' },
+      { id: 'o1-mini', label: 'o1-mini (轻量推理)' },
+      { id: 'gpt-4.5-preview', label: 'GPT-4.5 Preview' }
+    ],
+    hint: 'OpenAI 官方或 OneAPI/中转代理 API Key。',
+    bodyTemplate: '{\n  "model": "{model}",\n  "messages": [\n    {"role": "system", "content": "你是一个在线网课辅助答题AI。请直接输出针对问题的简明准确答案（仅输出正确答案的选项字母或文本，不要解释说明）。"},\n    {"role": "user", "content": "{question}"}\n  ],\n  "temperature": 0.1\n}',
+    path: 'choices[0].message.content'
+  },
+  gemini: {
+    name: 'Google Gemini',
+    url: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
+    modelsUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
+    method: 'POST',
+    models: [
+      { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (2025新一代极速/推荐)' },
+      { id: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash Lite (轻量快答)' },
+      { id: 'gemini-2.0-pro-exp-02-05', label: 'Gemini 2.0 Pro Exp (深度分析)' },
+      { id: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash (经典极速)' },
+      { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
+    ],
+    hint: 'Google AI Studio 免费申请 API Key。系统自动适配 x-goog-api-key。',
+    bodyTemplate: '{\n  "contents": [\n    {\n      "parts": [\n        {"text": "你是一个在线网课辅助答题AI。请直接输出针对问题的简明准确答案（仅输出正确答案的选项字母或文本，不要解释说明）：\\n\\n问题：{question}"}\n      ]\n    }\n  ],\n  "generationConfig": {\n    "temperature": 0.1\n  }\n}',
+    path: 'candidates[0].content.parts[0].text'
+  },
+  claude: {
+    name: 'Anthropic Claude',
+    url: 'https://api.anthropic.com/v1/messages',
+    modelsUrl: 'https://api.anthropic.com/v1/models',
+    method: 'POST',
+    models: [
+      { id: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet (2025前沿旗舰/推荐)' },
+      { id: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+      { id: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku (轻量极速)' }
+    ],
+    hint: 'Anthropic API Key。系统自动附加 x-api-key 与 anthropic-version。',
+    bodyTemplate: '{\n  "model": "{model}",\n  "max_tokens": 1024,\n  "system": "你是一个在线网课辅助答题AI。请直接输出针对问题的简明准确答案（仅输出正确答案的选项字母或文本，不要解释说明）。",\n  "messages": [\n    {"role": "user", "content": "{question}"}\n  ],\n  "temperature": 0.1\n}',
+    path: 'content[0].text'
+  },
+  siliconflow: {
+    name: 'SiliconFlow 硅基流动',
+    url: 'https://api.siliconflow.cn/v1/chat/completions',
+    modelsUrl: 'https://api.siliconflow.cn/v1/models',
+    method: 'POST',
+    models: [
+      { id: 'deepseek-ai/DeepSeek-R1', label: 'DeepSeek-R1 (硅基满血/推荐)' },
+      { id: 'deepseek-ai/DeepSeek-V3', label: 'DeepSeek-V3 (硅基满血)' },
+      { id: 'Qwen/Qwen2.5-72B-Instruct', label: 'Qwen 2.5 72B Instruct' }
+    ],
+    hint: '硅基流动官方 API Key。支持一键点击“自动识别”拉取上百个可用模型！',
+    bodyTemplate: '{\n  "model": "{model}",\n  "messages": [\n    {"role": "system", "content": "你是一个在线网课辅助答题AI。请直接输出针对问题的简明准确答案（仅输出正确答案的选项字母或文本，不要解释说明）。"},\n    {"role": "user", "content": "{question}"}\n  ],\n  "temperature": 0.1\n}',
+    path: 'choices[0].message.content'
+  },
+  qwen: {
+    name: '通义千问 Qwen',
+    url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    modelsUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/models',
+    method: 'POST',
+    models: [
+      { id: 'qwen-max', label: 'Qwen-Max (阿里旗舰)' },
+      { id: 'qwen-plus', label: 'Qwen-Plus (均衡推荐)' },
+      { id: 'qwen-qwq-32b', label: 'QwQ-32B (推理模型)' },
+      { id: 'qwen-turbo', label: 'Qwen-Turbo (极速)' }
+    ],
+    hint: '阿里云 DashScope API Key (兼容 OpenAI 协议)。',
+    bodyTemplate: '{\n  "model": "{model}",\n  "messages": [\n    {"role": "system", "content": "你是一个在线网课辅助答题AI。请直接输出针对问题的简明准确答案（仅输出正确答案的选项字母或文本，不要解释说明）。"},\n    {"role": "user", "content": "{question}"}\n  ],\n  "temperature": 0.1\n}',
+    path: 'choices[0].message.content'
+  },
+  custom: {
+    name: '自定义 / OneAPI 中转',
+    url: '',
+    modelsUrl: '',
+    method: 'POST',
+    models: [
+      { id: 'custom-model', label: '自定义模型ID (输入 URL 和 Key 后点击“自动识别”)' }
+    ],
+    hint: '完全自定义接口模式。输入 URL 和 Key 后点击“自动识别模型”即可在线抓取。',
+    bodyTemplate: '{\n  "model": "{model}",\n  "messages": [\n    {"role": "user", "content": "{question}"}\n  ]\n}',
+    path: 'choices[0].message.content'
+  }
+};
 
-    <!-- Main Content Panels -->
-    <main class="content-panels">
+const DEFAULT_SETTINGS = {
+  videoSpeed: '2.0',
+  videoMute: true,
+  videoLoop: false,
+  quizEnable: true,
+  apiProvider: 'deepseek',
+  modelName: 'deepseek-chat',
+  apiUrl: 'https://api.deepseek.com/chat/completions',
+  apiKey: '',
+  apiMethod: 'POST',
+  apiBody: PROVIDER_PRESETS.deepseek.bodyTemplate,
+  apiPath: PROVIDER_PRESETS.deepseek.path,
+  quizSubmitMode: 'fill',
+  autoNext: true,
+  autoBatchHomework: false,
+  actionDelay: 3
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Elements
+  const elVideoSpeed = document.getElementById('video-speed');
+  const elVideoMute = document.getElementById('video-mute');
+  const elVideoLoop = document.getElementById('video-loop');
+  const elQuizEnable = document.getElementById('quiz-enable');
+  const elQuizOptionsContainer = document.getElementById('quiz-options-container');
+  const elApiProvider = document.getElementById('api-provider');
+  const elModelSelect = document.getElementById('model-select');
+  const elModelCustomInput = document.getElementById('model-custom-input');
+  const elApiUrl = document.getElementById('api-url');
+  const elApiKey = document.getElementById('api-key');
+  const elApiMethod = document.getElementById('api-method');
+  const elPostBodyGroup = document.getElementById('post-body-group');
+  const elApiBody = document.getElementById('api-body');
+  const elApiPath = document.getElementById('api-path');
+  const elQuizSubmitMode = document.getElementById('quiz-submit-mode');
+  const elAutoNext = document.getElementById('auto-next');
+  const elAutoBatchHomework = document.getElementById('auto-batch-homework');
+  const elActionDelay = document.getElementById('action-delay');
+  const elActionDelayRange = document.getElementById('action-delay-range');
+  const speedDisplay = document.getElementById('speed-display');
+  const delayDisplay = document.getElementById('delay-display');
+  const providerHint = document.getElementById('provider-hint');
+  
+  const btnSave = document.getElementById('btn-save');
+  const btnTestApi = document.getElementById('btn-test-api');
+  const saveStatus = document.getElementById('save-status');
+  const testResult = document.getElementById('test-result');
+
+  // 1. Tab Switching Logic
+  const navTabs = document.querySelectorAll('.nav-tab');
+  const panelSections = document.querySelectorAll('.panel-section');
+
+  navTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      navTabs.forEach(t => t.classList.remove('active'));
+      panelSections.forEach(p => p.classList.remove('active'));
       
-      <!-- Tab 1: Video Engine -->
-      <section id="tab-video" class="panel-section active">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            视频播放引擎与时控
-          </div>
-          <span class="panel-tag">智能突破</span>
-        </div>
+      tab.classList.add('active');
+      const targetId = tab.getAttribute('data-target');
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) targetPanel.classList.add('active');
+    });
+  });
 
-        <div class="setting-item flex-column">
-          <div class="item-label-row">
-            <label class="item-title">播放倍速模式</label>
-            <span class="speed-value-badge" id="speed-display">2.0x</span>
-          </div>
-          <p class="item-desc">采用底层 HTMLVideoElement 钩子拦截，真正突破原生播放器限速防线</p>
-          
-          <div class="speed-pill-bar" id="speed-pill-bar">
-            <button type="button" class="speed-pill" data-speed="1.0">1.0x</button>
-            <button type="button" class="speed-pill" data-speed="1.25">1.25x</button>
-            <button type="button" class="speed-pill" data-speed="1.5">1.5x</button>
-            <button type="button" class="speed-pill active" data-speed="2.0">2.0x 极速</button>
-            <button type="button" class="speed-pill" data-speed="4.0">4.0x 超频</button>
-            <button type="button" class="speed-pill risk" data-speed="8.0">8.0x 狂飙</button>
-            <button type="button" class="speed-pill risk" data-speed="16.0">16x 极光</button>
-          </div>
-          <!-- Hidden real select for compatibility -->
-          <select id="video-speed" style="display: none;">
-            <option value="1.0">1.0</option>
-            <option value="1.25">1.25</option>
-            <option value="1.5">1.5</option>
-            <option value="2.0">2.0</option>
-            <option value="4.0">4.0</option>
-            <option value="8.0">8.0</option>
-            <option value="16.0">16.0</option>
-          </select>
-        </div>
+  // 2. Speed Pills Logic
+  const speedPills = document.querySelectorAll('.speed-pill');
+  speedPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      speedPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const speed = pill.getAttribute('data-speed');
+      elVideoSpeed.value = speed;
+      if (speedDisplay) speedDisplay.innerText = `${speed}x`;
+    });
+  });
 
-        <div class="setting-item flex-row">
-          <div class="item-text">
-            <label class="item-title" for="video-mute">后台自动静音播放</label>
-            <p class="item-desc">自动静音并保持静默挂机，上班打卡与学习互不干扰</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="video-mute" checked>
-            <span class="switch-slider"></span>
-          </label>
-        </div>
+  function updateSpeedPills(speed) {
+    if (speedDisplay) speedDisplay.innerText = `${speed}x`;
+    speedPills.forEach(p => {
+      if (p.getAttribute('data-speed') === speed) {
+        p.classList.add('active');
+      } else {
+        p.classList.remove('active');
+      }
+    });
+  }
 
-        <div class="setting-item flex-row">
-          <div class="item-text">
-            <label class="item-title" for="video-loop">循环播放模式 (时长防刷)</label>
-            <p class="item-desc">针对有最低时长要求的课程，视频结束后自动重新播放补足时长</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="video-loop">
-            <span class="switch-slider"></span>
-          </label>
-        </div>
-      </section>
+  // 3. Password Reveal Button
+  const btnRevealKey = document.getElementById('btn-reveal-key');
+  if (btnRevealKey && elApiKey) {
+    btnRevealKey.addEventListener('click', () => {
+      elApiKey.type = elApiKey.type === 'password' ? 'text' : 'password';
+    });
+  }
 
-      <!-- Tab 2: AI Quiz Assistant -->
-      <section id="tab-quiz" class="panel-section">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            多模型 AI 智能答题引擎
-          </div>
-          <div class="header-toggle">
-            <label class="toggle-switch">
-              <input type="checkbox" id="quiz-enable" checked>
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-        </div>
+  // 4. Delay Slider & Number Sync
+  if (elActionDelayRange && elActionDelay) {
+    elActionDelayRange.addEventListener('input', (e) => {
+      elActionDelay.value = e.target.value;
+      if (delayDisplay) delayDisplay.innerText = `${e.target.value} 秒`;
+    });
+    elActionDelay.addEventListener('input', (e) => {
+      elActionDelayRange.value = e.target.value;
+      if (delayDisplay) delayDisplay.innerText = `${e.target.value} 秒`;
+    });
+  }
 
-        <div id="quiz-options-container" class="sub-panel">
-          <!-- Model Provider Selector -->
-          <div class="provider-section">
-            <label class="item-title">选择 AI 模型厂商 / 接入协议</label>
-            <div class="provider-pills" id="provider-pills">
-              <button type="button" class="provider-pill active" data-provider="deepseek">🧠 DeepSeek</button>
-              <button type="button" class="provider-pill" data-provider="openai">🟢 OpenAI</button>
-              <button type="button" class="provider-pill" data-provider="gemini">🔷 Gemini</button>
-              <button type="button" class="provider-pill" data-provider="claude">🟣 Claude</button>
-              <button type="button" class="provider-pill" data-provider="custom">⚙️ 自定义</button>
-            </div>
-            <!-- Hidden real input -->
-            <input type="hidden" id="api-provider" value="deepseek">
-          </div>
+  // 5. AI Provider Pills & Switcher Logic
+  const providerPills = document.querySelectorAll('.provider-pill');
+  const advancedOptions = document.getElementById('advanced-api-options');
+  const btnToggleAdvanced = document.getElementById('btn-toggle-advanced');
 
-          <!-- API Key Input -->
-          <div class="setting-item flex-column">
-            <label class="item-title" for="api-key">API 授权密钥 (API Key / Token)</label>
-            <div class="input-with-icon">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              <input type="password" id="api-key" class="pro-input" placeholder="输入对应厂商的 API Key (如 sk-xxxx 或 AI Studio 密钥)">
-              <button type="button" class="btn-reveal" id="btn-reveal-key" title="显示/隐藏密钥">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-              </button>
-            </div>
-            <p class="item-desc" id="provider-hint">DeepSeek 官方或兼容 API 密钥。已自动适配身份鉴权头</p>
-          </div>
+  if (btnToggleAdvanced && advancedOptions) {
+    btnToggleAdvanced.addEventListener('click', () => {
+      const isHidden = advancedOptions.style.display === 'none';
+      advancedOptions.style.display = isHidden ? 'flex' : 'none';
+      btnToggleAdvanced.classList.toggle('open', isHidden);
+    });
+  }
 
-          <!-- Model Name Selector -->
-          <div class="grid-2col">
-            <div class="setting-item flex-column">
-              <label class="item-title" for="model-name">具体模型版本</label>
-              <select id="model-select" class="pro-select">
-                <!-- Populated dynamically by JS based on provider -->
-                <option value="deepseek-chat">DeepSeek-V3 (deepseek-chat)</option>
-                <option value="deepseek-reasoner">DeepSeek-R1 (deepseek-reasoner)</option>
-              </select>
-              <input type="text" id="model-custom-input" class="pro-input" style="display: none; margin-top: 4px;" placeholder="输入自定义模型ID如 gpt-4o">
-            </div>
-            <div class="setting-item flex-column">
-              <label class="item-title" for="quiz-submit-mode">答题提交策略</label>
-              <select id="quiz-submit-mode" class="pro-select">
-                <option value="fill">自动填充并暂存 (推荐)</option>
-                <option value="submit">自动填充并立即提交</option>
-              </select>
-            </div>
-          </div>
+  providerPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      providerPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const providerKey = pill.getAttribute('data-provider');
+      elApiProvider.value = providerKey;
+      applyProviderPreset(providerKey, false);
+    });
+  });
 
-          <!-- Endpoint URL -->
-          <div class="setting-item flex-column">
-            <label class="item-title" for="api-url">API 请求节点 URL 地址 (可自定义代理)</label>
-            <div class="input-with-icon">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-              <input type="url" id="api-url" class="pro-input code-input" placeholder="https://api.deepseek.com/chat/completions">
-            </div>
-            <p class="item-desc">默认使用厂商官方节点；如通过 OneAPI / 学校代理等中转，可直接修改为中转 URL</p>
-          </div>
+  function applyProviderPreset(providerKey, isInitialization) {
+    const preset = PROVIDER_PRESETS[providerKey] || PROVIDER_PRESETS.deepseek;
+    if (providerHint) providerHint.innerText = preset.hint;
 
-          <!-- Advanced Accordion Toggle -->
-          <div class="advanced-toggle-row">
-            <button type="button" class="btn-advanced-toggle" id="btn-toggle-advanced">
-              <span>🔧 高级配置：底层报文模板与提取路径 (非专业人士无需修改)</span>
-              <svg class="arrow-icon" id="arrow-advanced" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-          </div>
+    // Update Model Dropdown
+    if (elModelSelect) {
+      elModelSelect.innerHTML = '';
+      preset.models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.innerText = m.label;
+        elModelSelect.appendChild(opt);
+      });
+    }
 
-          <!-- Advanced API Options Container -->
-          <div id="advanced-api-options" class="advanced-container" style="display: none;">
-            <div class="setting-item flex-column">
-              <label class="item-title" for="api-method">HTTP 请求方式</label>
-              <select id="api-method" class="pro-select">
-                <option value="POST">POST</option>
-                <option value="GET">GET</option>
-              </select>
-            </div>
+    if (!isInitialization) {
+      const firstModel = preset.models[0] ? preset.models[0].id : '';
+      if (elModelSelect && firstModel) elModelSelect.value = firstModel;
+      
+      // Auto fill URL, method, body, path
+      let targetUrl = preset.url;
+      if (targetUrl.includes('{model}') && firstModel) {
+        targetUrl = targetUrl.replace('{model}', firstModel);
+      }
+      elApiUrl.value = targetUrl;
+      elApiMethod.value = preset.method;
+      
+      let targetBody = preset.bodyTemplate;
+      if (targetBody.includes('{model}') && firstModel) {
+        targetBody = targetBody.replace('{model}', firstModel);
+      }
+      elApiBody.value = targetBody;
+      elApiPath.value = preset.path;
+      togglePostBody(preset.method);
+    }
 
-            <div class="setting-item flex-column" id="post-body-group">
-              <label class="item-title" for="api-body">POST Request Body JSON 模板</label>
-              <textarea id="api-body" class="pro-textarea code-input" rows="4" placeholder='{"model": "...", "messages": [{"role": "user", "content": "{question}"}]}'></textarea>
-              <p class="item-desc">支持参数预设。<code>{question}</code> 在查询时将被实时替换为题目内容</p>
-            </div>
+    // If custom, show advanced options right away
+    if (advancedOptions && btnToggleAdvanced) {
+      if (providerKey === 'custom') {
+        advancedOptions.style.display = 'flex';
+        btnToggleAdvanced.classList.add('open');
+      } else if (!isInitialization) {
+        advancedOptions.style.display = 'none';
+        btnToggleAdvanced.classList.remove('open');
+      }
+    }
+  }
 
-            <div class="setting-item flex-column">
-              <label class="item-title" for="api-path">答案提取 JSON Path</label>
-              <input type="text" id="api-path" class="pro-input code-input" placeholder="choices[0].message.content">
-              <p class="item-desc">从返回 JSON 结构中定位解答结果的路径表达式</p>
-            </div>
-          </div>
+  // When model dropdown changes, update URL or body if they contain {model} or previous model
+  if (elModelSelect) {
+    elModelSelect.addEventListener('change', () => {
+      const selectedModel = elModelSelect.value;
+      const providerKey = elApiProvider.value || 'deepseek';
+      const preset = PROVIDER_PRESETS[providerKey];
+      if (!preset) return;
 
-          <!-- Developer Console / API Sandbox -->
-          <div class="api-sandbox-section">
-            <div class="sandbox-header">
-              <span class="sandbox-title">终端在线连通性测试 (多模型适配)</span>
-              <button type="button" id="btn-test-api" class="btn-sandbox-test">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                模拟发包测试
-              </button>
-            </div>
-            <div id="test-result" class="console-box" style="display: none;">
-              <span class="console-cursor"></span>
-            </div>
-          </div>
-        </div>
-      </section>
+      // Update URL if it's gemini style with {model}
+      if (preset.url.includes('{model}')) {
+        elApiUrl.value = preset.url.replace('{model}', selectedModel);
+      } else {
+        // Also check if current URL has old model inside
+        preset.models.forEach(m => {
+          if (elApiUrl.value.includes(m.id)) {
+            elApiUrl.value = elApiUrl.value.replace(m.id, selectedModel);
+          }
+        });
+      }
 
-      <!-- Tab 3: General & Workflow -->
-      <section id="tab-general" class="panel-section">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            无人值守与行为模拟
-          </div>
-          <span class="panel-tag">拟人算法</span>
-        </div>
+      // Update Body template model
+      let bodyText = elApiBody.value;
+      try {
+        const bodyObj = JSON.parse(bodyText);
+        if (bodyObj && bodyObj.model) {
+          bodyObj.model = selectedModel;
+          elApiBody.value = JSON.stringify(bodyObj, null, 2);
+        }
+      } catch (e) {
+        // If not JSON or custom, just replace token if exists
+      }
+    });
+  }
 
-        <div class="setting-item flex-row">
-          <div class="item-text">
-            <label class="item-title" for="auto-next">任务完成后自动跳转下一章节</label>
-            <p class="item-desc">自动检测本节课件视频及习题完成情况，全自动平滑跨越至下一节</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="auto-next" checked>
-            <span class="switch-slider"></span>
-          </label>
-        </div>
-
-        <div class="setting-item flex-row" style="border-left: 3px solid #8b5cf6;">
-          <div class="item-text">
-            <label class="item-title" for="auto-batch-homework" style="color: #c4b5fd;">🚀 连续刷作业/测验模式 (独立引擎)</label>
-            <p class="item-desc">打开作业/考试列表页后，自动按序连续进出并调用 AI 完成所有未交作业，直至全消。仅在作业/测试界面生效！</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="auto-batch-homework">
-            <span class="switch-slider"></span>
-          </label>
-        </div>
-
-        <div class="setting-item flex-column">
-          <div class="item-label-row">
-            <label class="item-title" for="action-delay">拟人操作延迟缓冲区 (秒)</label>
-            <span class="delay-badge" id="delay-display">3 秒</span>
-          </div>
-          <p class="item-desc">答题提交或章节跳转前增加随机拟人停顿延迟，有效防范平台高频行为风控</p>
-          <div class="range-slider-group">
-            <input type="range" id="action-delay-range" class="pro-slider" min="1" max="15" value="3">
-            <input type="number" id="action-delay" class="pro-input-number" min="1" max="30" value="3">
-          </div>
-        </div>
-
-        <div class="feature-highlights">
-          <div class="highlight-card">
-            <div class="highlight-icon">🛡️</div>
-            <div class="highlight-info">
-              <h4>防离开检测防护已开启</h4>
-              <p>页面自动屏蔽鼠标移出与窗口失焦暂停事件</p>
-            </div>
-          </div>
-          <div class="highlight-card">
-            <div class="highlight-icon">⚡</div>
-            <div class="highlight-info">
-              <h4>底层 Hook 引擎正常</h4>
-              <p>通过 HTMLVideoElement 原型链双重挂载保护</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- Bottom Sticky Actions -->
-    <footer class="app-footer">
-      <button type="button" id="btn-save" class="btn-pro-submit">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        保存当前配置并立即生效
-      </button>
-      <div id="save-status" class="save-toast"></div>
-    </footer>
-  </div>
-  <script src="popup.js"></script>
-</body>
-</html>
-
+  // 6. Load Settings from Storage
+  chrome.storage.local.get(DEFAULT_SETTINGS, (settings) => {
+    elVideoSpeed.value = settings.videoSpeed;
+    updateSpeedPills(settings.videoSpeed);
+    
+    elVideoMute.checked = settings.videoMute;
+    elVideoLoop.checked = settings.videoLoop;
+    elQuizEnable.checked = settings.quizEnable;
+    
+    // Provider & Model
+    const provider = settings.apiProvider || 'deepseek';
+    elApiProvider.value = provider;
+    providerPills.forEach(p => {
+      if (p.getAttribute('data-provider') === provider) p.classList.add('active');
+      else p.classList.remove('active');
+    });
+    applyProviderPreset(provider, true);
+    
+    if (elModelSelect && settings.modelName) {
+      // Check if saved model exists in dropdown
+      let exists = false;
+      for (let i = 0; i < elModelSelect.options.length; i++) {
+        if (elModelSelect.options[i].value === settings.modelName) exists = true;
       }
       if (!exists && settings.modelName) {
         const opt = document.createElement('option');
@@ -500,5 +539,316 @@
       return undefined;
     }
   }
+
+  // 6. Launch Big Window & Master Control Bar
+  const btnOpenBigWindow = document.getElementById('btn-open-big-window');
+  if (btnOpenBigWindow) {
+    btnOpenBigWindow.addEventListener('click', () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL('popup/popup.html') });
+    });
+  }
+
+  const btnMasterToggle = document.getElementById('btn-master-toggle');
+  const btnRestoreWidget = document.getElementById('btn-restore-widget');
+  const btnPopupSkip = document.getElementById('btn-popup-skip');
+
+  function updateMasterToggleUI(isRunning) {
+    if (!btnMasterToggle) return;
+    if (isRunning) {
+      btnMasterToggle.className = 'btn-master-toggle active';
+      btnMasterToggle.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg> <span>暂停挂机引擎</span>';
+    } else {
+      btnMasterToggle.className = 'btn-master-toggle paused';
+      btnMasterToggle.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>启动全自动引擎</span>';
+    }
+  }
+
+  chrome.storage.local.get({ engineRunning: true }, (res) => {
+    updateMasterToggleUI(res.engineRunning !== false);
+  });
+
+  if (btnMasterToggle) {
+    btnMasterToggle.addEventListener('click', () => {
+      chrome.storage.local.get({ engineRunning: true }, (res) => {
+        const nextState = !(res.engineRunning !== false);
+        chrome.storage.local.set({ engineRunning: nextState }, () => {
+          updateMasterToggleUI(nextState);
+          if (saveStatus) {
+            saveStatus.innerText = nextState ? '🚀 全自动挂机引擎已成功启动！' : '⏸ 挂机引擎已手动挂起暂停';
+            saveStatus.className = 'save-toast show';
+            setTimeout(() => { saveStatus.className = 'save-toast'; }, 2000);
+          }
+        });
+      });
+    });
+  }
+
+  if (btnRestoreWidget) {
+    btnRestoreWidget.addEventListener('click', () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'CX_RESTORE_WIDGET' }, () => {
+            if (chrome.runtime.lastError) {}
+          });
+        }
+      });
+      chrome.storage.local.set({ engineRunning: true }, () => {
+        updateMasterToggleUI(true);
+        if (saveStatus) {
+          saveStatus.innerText = '📌 已向左侧网页发送指令：已恢复小窗并启动引擎！';
+          saveStatus.className = 'save-toast show';
+          setTimeout(() => { saveStatus.className = 'save-toast'; }, 2200);
+        }
+      });
+    });
+  }
+
+  if (btnPopupSkip) {
+    btnPopupSkip.addEventListener('click', () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs && tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'CX_SKIP_CHAPTER' });
+        }
+      });
+      if (saveStatus) {
+        saveStatus.innerText = '⚡ 已触发手动跨越至下一章节指令！';
+        saveStatus.className = 'save-toast show';
+        setTimeout(() => { saveStatus.className = 'save-toast'; }, 2000);
+      }
+    });
+  }
+
+  // 7. Real-time Log Console Logic
+  const popupLogConsole = document.getElementById('popup-log-console');
+  const btnClearLogs = document.getElementById('btn-clear-logs');
+  const btnCopyLogs = document.getElementById('btn-copy-logs');
+  const filterBtns = document.querySelectorAll('.log-filter-btn');
+  let currentLogFilter = 'all';
+  let cachedLogs = [];
+
+  function renderPopupLogs() {
+    if (!popupLogConsole) return;
+    chrome.storage.local.get({ recentLogs: [] }, (data) => {
+      cachedLogs = data.recentLogs || [];
+      updateLogDisplay();
+    });
+  }
+
+  function updateLogDisplay() {
+    if (!popupLogConsole) return;
+    if (cachedLogs.length === 0) {
+      popupLogConsole.innerHTML = '<div class="log-empty-tip">暂无运行日志，请在超星学习通页面开启自动化...</div>';
+      return;
+    }
+
+    const filtered = cachedLogs.filter(item => {
+      if (currentLogFilter === 'all') return true;
+      return item.level === currentLogFilter;
+    });
+
+    if (filtered.length === 0) {
+      popupLogConsole.innerHTML = `<div class="log-empty-tip">无符合分类 "${currentLogFilter}" 的日志条目</div>`;
+      return;
+    }
+
+    popupLogConsole.innerHTML = '';
+    filtered.forEach(log => {
+      const line = document.createElement('div');
+      line.className = `popup-log-item ${log.level || 'info'}`;
+      line.textContent = log.text;
+      popupLogConsole.appendChild(line);
+    });
+
+    popupLogConsole.scrollTop = popupLogConsole.scrollHeight;
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentLogFilter = btn.getAttribute('data-filter') || 'all';
+      updateLogDisplay();
+    });
+  });
+
+  if (btnClearLogs) {
+    btnClearLogs.addEventListener('click', () => {
+      chrome.storage.local.set({ recentLogs: [] }, () => {
+        cachedLogs = [];
+        updateLogDisplay();
+        if (saveStatus) {
+          saveStatus.innerText = '🧹 已成功清空所有日志记录！';
+          saveStatus.className = 'save-toast show';
+          setTimeout(() => { saveStatus.className = 'save-toast'; }, 2000);
+        }
+      });
+    });
+  }
+
+  if (btnCopyLogs) {
+    btnCopyLogs.addEventListener('click', () => {
+      if (cachedLogs.length === 0) return;
+      const textToCopy = cachedLogs.map(l => l.text).join('\n');
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        if (saveStatus) {
+          saveStatus.innerText = '📋 运行日志已复制到剪贴板！';
+          saveStatus.className = 'save-toast show';
+          setTimeout(() => { saveStatus.className = 'save-toast'; }, 2000);
+        }
+      });
+    });
+  }
+
+  // Live storage update listener for real-time log pushing
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.recentLogs) {
+      cachedLogs = changes.recentLogs.newValue || [];
+      updateLogDisplay();
+    }
+  });
+
+  // Initial log render
+  renderPopupLogs();
+
+  // 8. About & Support Interactions
+  const btnCopyEmail = document.getElementById('btn-copy-email');
+  const btnOpenGithub = document.getElementById('btn-open-github');
+
+  if (btnCopyEmail) {
+    btnCopyEmail.addEventListener('click', () => {
+      const email = 'etonsalmon160@gmail.com';
+      navigator.clipboard.writeText(email).then(() => {
+        if (saveStatus) {
+          saveStatus.innerText = `📧 已复制开发者邮箱: ${email}`;
+          saveStatus.className = 'save-toast show';
+          setTimeout(() => { saveStatus.className = 'save-toast'; }, 2500);
+        }
+      });
+    });
+  }
+
+  if (btnOpenGithub) {
+    btnOpenGithub.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://github.com/etonsalmon160-source/chaoxing-pro-engine' });
+    });
+  }
+
+  // 9. Auto-Fetch Available Models Logic
+  const btnFetchModels = document.getElementById('btn-fetch-models');
+  if (btnFetchModels) {
+    btnFetchModels.addEventListener('click', () => {
+      const provider = elApiProvider.value;
+      const key = elApiKey.value.trim();
+      const currentUrl = elApiUrl.value.trim();
+      const preset = PROVIDER_PRESETS[provider] || PROVIDER_PRESETS.deepseek;
+
+      let modelsEndpoint = preset.modelsUrl;
+
+      // Smart endpoint detection for Custom / OneAPI / OpenAI proxies
+      if (currentUrl) {
+        if (currentUrl.includes('/chat/completions')) {
+          modelsEndpoint = currentUrl.replace('/chat/completions', '/models');
+        } else if (currentUrl.includes('/messages')) {
+          modelsEndpoint = currentUrl.replace('/messages', '/models');
+        } else if (provider === 'gemini' && currentUrl.includes('generateContent')) {
+          modelsEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models';
+        }
+      }
+
+      if (!modelsEndpoint) {
+        modelsEndpoint = 'https://api.openai.com/v1/models';
+      }
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (key) {
+        if (provider === 'claude') {
+          headers['x-api-key'] = key;
+          headers['anthropic-version'] = '2023-06-01';
+        } else if (provider === 'gemini') {
+          headers['x-goog-api-key'] = key;
+        } else {
+          headers['Authorization'] = key.startsWith('Bearer ') ? key : `Bearer ${key}`;
+        }
+      }
+
+      if (provider === 'gemini' && key && !modelsEndpoint.includes('key=')) {
+        modelsEndpoint += (modelsEndpoint.includes('?') ? '&' : '?') + `key=${encodeURIComponent(key)}`;
+      }
+
+      btnFetchModels.disabled = true;
+      btnFetchModels.innerText = '⏳ 拉取中...';
+
+      chrome.runtime.sendMessage({
+        type: 'QUERY_API',
+        payload: {
+          url: modelsEndpoint,
+          method: 'GET',
+          headers: headers
+        }
+      }, (response) => {
+        btnFetchModels.disabled = false;
+        btnFetchModels.innerText = '🔄 自动识别模型';
+
+        if (!response || !response.success) {
+          if (saveStatus) {
+            saveStatus.innerText = `❌ 拉取失败: ${response ? response.error : '连接超时或未填 Key'}`;
+            saveStatus.className = 'save-toast show error';
+            setTimeout(() => { saveStatus.className = 'save-toast'; }, 3000);
+          }
+          return;
+        }
+
+        let modelList = [];
+        const resData = response.data;
+
+        // OpenAI / SiliconFlow / OneAPI / DeepSeek standard response
+        if (resData && Array.isArray(resData.data)) {
+          modelList = resData.data.map(m => m.id || m.name).filter(Boolean);
+        } else if (resData && Array.isArray(resData.models)) {
+          // Gemini format: models/gemini-2.0-flash
+          modelList = resData.models.map(m => {
+            const name = m.name || m.id || '';
+            return name.replace(/^models\//, '');
+          }).filter(Boolean);
+        } else if (Array.isArray(resData)) {
+          modelList = resData.map(m => typeof m === 'string' ? m : (m.id || m.name)).filter(Boolean);
+        }
+
+        if (modelList.length > 0) {
+          // Sort chat/flash/reasoner models to top
+          modelList.sort((a, b) => {
+            const aIsPreferred = /deepseek|gpt-4|o3|o1|gemini-2|claude-3|qwen/i.test(a);
+            const bIsPreferred = /deepseek|gpt-4|o3|o1|gemini-2|claude-3|qwen/i.test(b);
+            if (aIsPreferred && !bIsPreferred) return -1;
+            if (!aIsPreferred && bIsPreferred) return 1;
+            return a.localeCompare(b);
+          });
+
+          modelList = modelList.slice(0, 60);
+
+          elModelSelect.innerHTML = '';
+          modelList.forEach(mId => {
+            const opt = document.createElement('option');
+            opt.value = mId;
+            opt.textContent = `${mId}`;
+            elModelSelect.appendChild(opt);
+          });
+
+          if (saveStatus) {
+            saveStatus.innerText = `✨ 成功自动识别拉取到 ${modelList.length} 个可用模型！`;
+            saveStatus.className = 'save-toast show success';
+            setTimeout(() => { saveStatus.className = 'save-toast'; }, 3000);
+          }
+        } else {
+          if (saveStatus) {
+            saveStatus.innerText = '⚠ 接口返回成功但未抓取到模型字段，已保留默认。';
+            saveStatus.className = 'save-toast show';
+            setTimeout(() => { saveStatus.className = 'save-toast'; }, 3000);
+          }
+        }
+      });
+    });
+  }
 });
+
 
