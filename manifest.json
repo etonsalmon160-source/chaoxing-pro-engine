@@ -4,10 +4,7 @@
   "version": "1.0.0",
   "description": "自动视频播放、倍速、静音、章节测验答题（预留自定义题库API接口）、自动跳转下一节",
   "permissions": [
-    "storage",
-    "alarms",
-    "notifications",
-    "tts"
+    "storage"
   ],
   "host_permissions": [
     "*://*.chaoxing.com/*",

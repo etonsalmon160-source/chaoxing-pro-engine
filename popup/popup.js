@@ -119,10 +119,7 @@ const DEFAULT_SETTINGS = {
   quizSubmitMode: 'fill',
   autoNext: true,
   autoBatchHomework: false,
-  actionDelay: 3,
-  morningBroadcastEnabled: false,
-  morningBroadcastTime: '08:00',
-  morningBroadcastMessage: '早上好，学习任务开始啦！'
+  actionDelay: 3
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -146,9 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const elAutoBatchHomework = document.getElementById('auto-batch-homework');
   const elActionDelay = document.getElementById('action-delay');
   const elActionDelayRange = document.getElementById('action-delay-range');
-  const elMorningBroadcastEnabled = document.getElementById('morning-broadcast-enabled');
-  const elMorningBroadcastTime = document.getElementById('morning-broadcast-time');
-  const elMorningBroadcastMessage = document.getElementById('morning-broadcast-message');
   const speedDisplay = document.getElementById('speed-display');
   const delayDisplay = document.getElementById('delay-display');
   const providerHint = document.getElementById('provider-hint');
@@ -363,9 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
     elQuizSubmitMode.value = settings.quizSubmitMode;
     elAutoNext.checked = settings.autoNext;
     if (elAutoBatchHomework) elAutoBatchHomework.checked = !!settings.autoBatchHomework;
-    if (elMorningBroadcastEnabled) elMorningBroadcastEnabled.checked = !!settings.morningBroadcastEnabled;
-    if (elMorningBroadcastTime) elMorningBroadcastTime.value = settings.morningBroadcastTime || '08:00';
-    if (elMorningBroadcastMessage) elMorningBroadcastMessage.value = settings.morningBroadcastMessage || '早上好，学习任务开始啦！';
     
     elActionDelay.value = settings.actionDelay;
     if (elActionDelayRange) elActionDelayRange.value = settings.actionDelay;
@@ -414,10 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
       quizSubmitMode: elQuizSubmitMode.value,
       autoNext: elAutoNext.checked,
       autoBatchHomework: elAutoBatchHomework ? elAutoBatchHomework.checked : false,
-      actionDelay: parseInt(elActionDelay.value, 10) || 3,
-      morningBroadcastEnabled: elMorningBroadcastEnabled ? elMorningBroadcastEnabled.checked : false,
-      morningBroadcastTime: elMorningBroadcastTime && elMorningBroadcastTime.value ? elMorningBroadcastTime.value : '08:00',
-      morningBroadcastMessage: (elMorningBroadcastMessage && elMorningBroadcastMessage.value ? elMorningBroadcastMessage.value : '').trim() || '早上好，学习任务开始啦！'
+      actionDelay: parseInt(elActionDelay.value, 10) || 3
     };
 
     chrome.storage.local.set(settings, () => {
@@ -862,4 +850,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
 
